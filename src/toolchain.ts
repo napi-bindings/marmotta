@@ -21,10 +21,8 @@ function run(executable: string, args: string[], options: { cwd?: string } = {})
     child.once('close', (code, signal) => {
       if (code === 0) resolve();
       else {
-        reject(new MarmottaError(
-          'TOOLCHAIN_COMMAND_FAILED',
-          `${basename(executable)} exited with code ${code ?? `signal ${signal ?? 'unknown'}`}.`,
-        ));
+        const reason = code === null ? `was terminated by signal ${signal ?? 'unknown'}` : `exited with code ${code}`;
+        reject(new MarmottaError('TOOLCHAIN_COMMAND_FAILED', `${basename(executable)} ${reason}.`));
       }
     });
   });

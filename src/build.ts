@@ -10,7 +10,7 @@ const nodeApiHeaders = require('node-api-headers') as NodeApiHeaders;
 
 export type BuildOptions = {
   directory: string;
-  output?: string;
+  outputDir?: string;
   target?: string;
   debug?: boolean;
 };
@@ -35,7 +35,8 @@ function windowsMachine(target: string | undefined): string {
 }
 
 async function compile(config: ProjectConfig, options: BuildOptions, cleanOnly: boolean): Promise<void> {
-  const output = options.output ? resolve(options.directory, options.output) : config.output;
+  const outputDir = options.outputDir ? resolve(options.directory, options.outputDir) : config.outputDir;
+  const output = join(outputDir, `${config.name}.node`);
   if (cleanOnly) {
     await rm(output, { force: true });
     console.log(`Removed ${output}`);

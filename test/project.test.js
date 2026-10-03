@@ -27,7 +27,7 @@ test('discovers C and C++ sources and ignores generated directories', async () =
 
     const config = await loadProject(directory);
     assert.deepEqual(config.sources.map((source) => basename(source)), ['hello.c', 'addon.cc']);
-    assert.equal(config.output, join(directory, `${basename(directory)}.node`));
+    assert.equal(config.outputDir, directory);
   });
 });
 
@@ -39,14 +39,14 @@ test('loads explicit options and resolves relative paths', async () => {
       sources: ['addon.cpp'],
       includeDirs: ['include'],
       cxxFlags: ['-std=c++17'],
-      output: 'build/hello.node',
+      outputDir: 'build',
     }));
 
     const config = await loadProject(directory);
     assert.deepEqual(config.sources, [join(directory, 'addon.cpp')]);
     assert.deepEqual(config.includeDirs, [join(directory, 'include')]);
     assert.deepEqual(config.cxxFlags, ['-std=c++17']);
-    assert.equal(config.output, join(directory, 'build', 'hello.node'));
+    assert.equal(config.outputDir, join(directory, 'build'));
   });
 });
 

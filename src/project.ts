@@ -9,7 +9,7 @@ export type ProjectConfig = {
   cFlags: string[];
   cxxFlags: string[];
   linkerFlags: string[];
-  output: string;
+  outputDir: string;
 };
 
 type PackageJson = { name?: unknown };
@@ -99,6 +99,10 @@ export async function loadProject(directory: string): Promise<ProjectConfig> {
   const name = typeof input.name === 'string' && input.name.length > 0
     ? input.name.replace(/[^a-zA-Z0-9_-]/g, '_')
     : await projectName(directory);
+  if (input.outputDir !== undefined && (typeof input.outputDir !== 'string' || input.outputDir.length === 0)) {
+    throw new MarmottaError('PROJECT_CONFIG_INVALID', 'The "outputDir" property must be a non-empty string.');
+  }
+  const outputDir = typeof input.outputDir === 'string' ? input.outputDir : '.';
   let discoveredSources: string[];
   try {
     discoveredSources = sources.length > 0
@@ -138,6 +142,6 @@ export async function loadProject(directory: string): Promise<ProjectConfig> {
     cFlags,
     cxxFlags,
     linkerFlags,
-    output: resolve(directory, typeof input.output === 'string' ? input.output : `${name}.node`),
+    outputDir: resolve(directory, outputDir),
   };
 }
