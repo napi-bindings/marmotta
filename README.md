@@ -61,7 +61,7 @@ Configuration fields:
 
 Each array field must be an array of strings. When source discovery is used, Marmotta ignores `.git`, `.marmotta`, `build`, `dist`, and `node_modules` directories. Explicit source paths are resolved relative to the project directory and must exist.
 
-Your source must expose Node-API initialization code, for example using `NAPI_MODULE(...)`. Marmotta supplies the Node-API include path automatically. It compiles C and C++ files with their respective flags and links them into one `.node` file.
+Your source must expose Node-API initialization code, for example using `NAPI_MODULE(...)`. Marmotta supplies the Node-API include path automatically. It also defines the `NODE_GYP_MODULE_NAME` macro for every source file, set to the addon `name` (with characters that are invalid in C identifiers replaced by `_`), so code written for node-gyp such as `NODE_API_MODULE(NODE_GYP_MODULE_NAME, Initialize)` builds unchanged. It compiles C and C++ files with their respective flags and links them into one `.node` file.
 
 For example, save this as `src/hello.c` to export a JavaScript function named `hello`:
 

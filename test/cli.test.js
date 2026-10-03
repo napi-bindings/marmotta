@@ -58,7 +58,7 @@ static napi_value Initialize(napi_env env, napi_value exports) {
     return exports;
 }
 
-NAPI_MODULE(hello, Initialize)
+NAPI_MODULE(NODE_GYP_MODULE_NAME, Initialize)
 `;
 
   try {

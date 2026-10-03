@@ -15,7 +15,7 @@ async function withProject(run) {
   }
 }
 
-test('scopre sorgenti C e C++ e ignora cartelle generate', async () => {
+test('discovers C and C++ sources and ignores generated directories', async () => {
   await withProject(async (directory) => {
     await mkdir(join(directory, 'src'));
     await mkdir(join(directory, 'node_modules', 'dependency'), { recursive: true });
@@ -31,7 +31,7 @@ test('scopre sorgenti C e C++ e ignora cartelle generate', async () => {
   });
 });
 
-test('carica le opzioni esplicite e risolve i percorsi relativi', async () => {
+test('loads explicit options and resolves relative paths', async () => {
   await withProject(async (directory) => {
     await writeFile(join(directory, 'addon.cpp'), '');
     await writeFile(join(directory, 'marmotta.config.json'), JSON.stringify({
@@ -50,7 +50,7 @@ test('carica le opzioni esplicite e risolve i percorsi relativi', async () => {
   });
 });
 
-test('rifiuta configurazioni con tipi errati e sorgenti mancanti', async () => {
+test('rejects configurations with wrong types and missing sources', async () => {
   await withProject(async (directory) => {
     await writeFile(join(directory, 'marmotta.config.json'), JSON.stringify({ sources: ['missing.c'] }));
     await assert.rejects(loadProject(directory), (error) =>
