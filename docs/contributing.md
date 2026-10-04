@@ -9,7 +9,7 @@ us.
 > This is an informal guide. For full details, please review the formal
 > [CONTRIBUTING
 > document](https://github.com/napi-bindings/marmotta/blob/main/CONTRIBUTING.md)
-> our [Developer Certificate of
+> and our [Developer Certificate of
 > Origin](https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin).
 
 ## Table Of Contents
@@ -21,7 +21,6 @@ us.
 - [Ground Rules & Expectations](#ground-rules--expectations)
 - [How To Contribute](#how-to-contribute)
 - [Setting Up Your Environment](#setting-up-your-environment)
-  - [Using Visual Studio Code](#using-visual-studio-code)
 
 ## Types Of Contributions We're Looking For
 <a id="contribution-types"></a>
@@ -73,6 +72,6 @@ guide, do one of the following:
 ## Setting Up Your Environment
 <a id="contributing-environment"></a>
 
-Please adhere to the project's code and [documentation](./Style-Guide.md)
+Please adhere to the project's code and [documentation](./style-guide.md)
 style. Some popular tools that automatically "correct" code and documentation
 do not follow a style that conforms to this project's styles.

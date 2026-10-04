@@ -63,8 +63,8 @@ static path.
 Do not add videos or screenshots to the documentation. It is easier to keep
 under version control. Videos and images will eventually end up becoming
 outdated as new updates keep developing. Instead, make a referral link or a
-YouTube video. You can add links by using `[Title](www.websitename.com)` in the
-markdown.
+YouTube video. You can add links by using `[Title](https://www.websitename.com)`
+in the markdown.
 
 ### Avoid plagiarism
 
@@ -92,11 +92,11 @@ Less like this: we can use the following functions.
 
 More like this: You can use the following functions.
 
-> According to [Wikipedia](#), ***You*** is usually a second person pronoun.
+> According to [Wikipedia](https://en.wikipedia.org/wiki/You), ***You*** is usually a second person pronoun.
 > Also, used to refer to an indeterminate person, as a more common alternative
 > to a very formal indefinite pronoun.
 
-## When to avoid the second person "you" as the pronoun
+### When to avoid the second person "you" as the pronoun
 
 One of the main rules of formal writing such as reference documentation, or API
 documentation, is to avoid the second person ("you") or directly addressing the
@@ -191,7 +191,8 @@ Styles](https://medium.com/better-programming/string-case-styles-camel-pascal-sn
 ### Hyperlinks
 
 Hyperlinks should have a clear title of what they reference.
-```
+
+For example: [Marmotta contributing guide](../CONTRIBUTING.md).
 
 Include in your documentation as many essential references as possible, but
 avoid having numerous links when writing for beginners to avoid distractions.

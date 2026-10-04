@@ -13,7 +13,7 @@ details on contributing to this project.
 
 If you think you meet the above criteria and we have not invited you yet, we are
 sorry! Feel free to reach out to a [Lead
-Maintainer](https://github.com/napi-bindings/marmotta#Team) privately with a few links
+Maintainer](https://github.com/napi-bindings/marmotta#team) privately with a few links
 to your valuable contributions. Read the [GOVERNANCE](GOVERNANCE.md) to get more
 information.
 

@@ -6,7 +6,7 @@
 * [Collaborators](#collaborators)
   * [Collaborator activities](#collaborator-activities)
 * [Great Contributors](#great-contributors)
-* [Collaborator nominations](#collaborator-maintainers-nominations)
+* [Collaborator nominations](#collaborator-nominations)
 * [Lead Maintainers nominations](#lead-maintainers-nominations)
 * [Consensus seeking process](#consensus-seeking-process)
 
@@ -58,7 +58,7 @@ contributor.
 ## Collaborator nominations
 
 Individuals making significant and valuable contributions to the project may be
-a candidate to join the napi-binsings organization.
+a candidate to join the napi-bindings organization.
 
 A Collaborator needs to open a private team discussion on GitHub and list the
 candidates they want to sponsor with a link to the user's contributions. For
@@ -70,12 +70,12 @@ example:
 Otherwise, a Contributor may self-apply if they believe they meet the above
 criteria by reaching out to a Lead Maintainer privately with the links to their
 valuable contributions. The Lead Maintainers will reply to the Contributor and
-will decide if candidate it to be made a collaborator.
+will decide whether the candidate should be made a Collaborator.
 
 The consensus to grant a new candidate Collaborator status is reached when:
 
 - at least one of the Lead Maintainers approve
-- at least two of the Team Members approve
+- at least two of the Collaborators approve
 
 After these conditions are satisfied, the [onboarding
 process](CONTRIBUTING.md#onboarding-collaborators) may start.
