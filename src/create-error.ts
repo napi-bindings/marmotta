@@ -17,8 +17,12 @@ function toString(this: MarmottaError): string {
   return `${this.name} [${this.code}]: ${this.message}`;
 }
 
-function isOptionsWithCause(value: unknown): value is { cause: unknown } {
-  return typeof value === 'object' && value !== null && 'cause' in value;
+// An options bag is a plain object containing at most the `cause` key; any other object is a format argument.
+function isOptions(value: unknown): value is { cause?: unknown } {
+  if (typeof value !== 'object' || value === null) return false;
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  return Object.keys(value).every((key) => key === 'cause');
 }
 
 export function createError<C extends string, Args extends unknown[] = unknown[]>(
@@ -36,17 +40,17 @@ export function createError<C extends string, Args extends unknown[] = unknown[]
 
   const specificErrorSymbol = Symbol.for(`marmotta-error ${errorCode}`);
 
-  function MarmottaErrorImpl(this: MarmottaError | undefined, ...args: unknown[]): MarmottaError {
+  function MarmottaErrorImpl(...args: unknown[]): MarmottaError {
     if (!new.target) return new (MarmottaErrorImpl as unknown as new (...a: unknown[]) => MarmottaError)(...args);
-    const self = this as MarmottaError;
+    const self = Reflect.construct(Base, [], new.target) as MarmottaError;
 
     self.code = errorCode;
     self.name = 'MarmottaError';
     self.exitCode = exitCode;
 
     const last = args.at(-1);
-    if (isOptionsWithCause(last)) {
-      self.cause = last.cause;
+    if (isOptions(last)) {
+      if ('cause' in last) self.cause = last.cause;
       args.pop();
     }
 
