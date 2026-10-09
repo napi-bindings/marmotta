@@ -16,7 +16,7 @@ const archiveExtension = process.platform === 'win32' ? 'zip' : 'tar.xz';
 const executableName = process.platform === 'win32' ? 'zig.exe' : 'zig';
 const tarAvailable = spawnSync('tar', ['--version'], { stdio: 'ignore' }).status === 0;
 
-async function withToolchainEnvironment(run) {
+async function withToolchainEnvironment(run, getZigDirectory) {
   const directory = await mkdtemp(join(tmpdir(), 'marmotta-toolchain-test-'));
   const home = join(directory, 'home');
   const bin = join(directory, 'bin');
@@ -41,7 +41,13 @@ async function withToolchainEnvironment(run) {
       NODE_OPTIONS: `--import=${pathToFileURL(preload).href}`,
       MARMOTTA_TEST_TOOLCHAIN_MODULE: toolchainModule,
     };
-    await run({ directory, home, env });
+    delete env.MARMOTTA_ZIG_DIR;
+    const customZigDirectory = typeof getZigDirectory === 'function'
+      ? getZigDirectory(directory)
+      : getZigDirectory;
+    if (customZigDirectory !== undefined) env.MARMOTTA_ZIG_DIR = customZigDirectory;
+    const marmottaRoot = customZigDirectory ?? home;
+    await run({ directory, home, env, marmottaRoot, zigRoot: join(marmottaRoot, 'toolchains', 'zig') });
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -77,6 +83,36 @@ function runEnsureZig({ env, version, index, archivePath }) {
   return JSON.parse(result.stdout.trim());
 }
 
+function runRunZig({ env, recordPath }) {
+  const script = `
+    const { runZig } = await import(process.env.MARMOTTA_TEST_TOOLCHAIN_MODULE);
+    await runZig({ executable: process.execPath, args: [${JSON.stringify(recordPath)}] }, [], process.cwd());
+  `;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+    encoding: 'utf8',
+    env,
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+}
+
+function runRunZigResult({ env }) {
+  const script = `
+    const { runZig } = await import(process.env.MARMOTTA_TEST_TOOLCHAIN_MODULE);
+    try {
+      await runZig({ executable: process.execPath, args: [] }, [], process.cwd());
+      console.log(JSON.stringify({ status: 0 }));
+    } catch (error) {
+      console.log(JSON.stringify({ code: error.code, exitCode: error.exitCode, message: error.message }));
+      process.exitCode = error.exitCode ?? 1;
+    }
+  `;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+    encoding: 'utf8',
+    env,
+  });
+  return { status: result.status, ...JSON.parse(result.stdout.trim()) };
+}
+
 function releaseIndex(...versions) {
   return Object.fromEntries(versions.map((version) => [
     version,
@@ -100,6 +136,100 @@ test('uses the exact managed Zig version instead of a different Zig on PATH', as
     assert.equal(result.executable, join(localToolchain, executableName));
     assert.deepEqual(result.urls, []);
   });
+});
+
+test('installs the pinned Zig release under MARMOTTA_ZIG_DIR', async () => {
+  await withToolchainEnvironment(
+    async ({ directory, marmottaRoot, zigRoot, env }) => {
+      const payload = join(directory, 'payload');
+      await mkdir(payload);
+      await writeFile(join(payload, executableName), '');
+      const archivePath = join(directory, 'custom-zig.tar');
+      const archive = spawnSync('tar', ['-cf', archivePath, '-C', payload, executableName], { encoding: 'utf8' });
+      assert.equal(archive.status, 0, archive.stderr);
+
+      const result = runEnsureZig({
+        env,
+        version: zigVersion,
+        index: releaseIndex(zigVersion, newerVersion),
+        archivePath,
+      });
+
+      assert.equal(result.executable, join(zigRoot, zigVersion, executableName));
+      assert.deepEqual(result.urls, [
+        'https://ziglang.org/download/index.json',
+        `https://ziglang.org/${zigVersion}.${archiveExtension}`,
+      ]);
+      await readFile(result.executable);
+    },
+    (directory) => join(directory, 'shared-tools'),
+  );
+});
+
+test('places Zig global cache under MARMOTTA_ZIG_DIR', async () => {
+  await withToolchainEnvironment(
+    async ({ directory, marmottaRoot, zigRoot, env }) => {
+      const recordPath = join(directory, 'zig-cache-env.json');
+      const recordScript = join(directory, 'record-zig-env.mjs');
+      await writeFile(recordScript, `
+        import { writeFileSync } from 'node:fs';
+        writeFileSync(${JSON.stringify(recordPath)}, JSON.stringify({
+          zigCache: process.env.ZIG_GLOBAL_CACHE_DIR,
+        }));
+      `);
+
+      runRunZig({ env, recordPath: recordScript });
+
+      assert.deepEqual(JSON.parse(await readFile(recordPath, 'utf8')), {
+        zigCache: join(marmottaRoot, 'cache'),
+      });
+    },
+    (directory) => join(directory, 'shared-tools'),
+  );
+});
+
+test('preserves an explicitly configured Zig global cache under MARMOTTA_ZIG_DIR', async () => {
+  await withToolchainEnvironment(
+    async ({ directory, env }) => {
+      const explicitCache = join(directory, 'explicit-cache');
+      await mkdir(explicitCache);
+      env.ZIG_GLOBAL_CACHE_DIR = explicitCache;
+
+      const recordPath = join(directory, 'explicit-zig-cache-env.json');
+      const recordScript = join(directory, 'record-explicit-zig-cache-env.mjs');
+      await writeFile(recordScript, `
+        import { writeFileSync } from 'node:fs';
+        writeFileSync(${JSON.stringify(recordPath)}, JSON.stringify({
+          zigCache: process.env.ZIG_GLOBAL_CACHE_DIR,
+        }));
+      `);
+
+      runRunZig({ env, recordPath: recordScript });
+
+      assert.deepEqual(JSON.parse(await readFile(recordPath, 'utf8')), {
+        zigCache: explicitCache,
+      });
+    },
+    (directory) => join(directory, 'shared-tools'),
+  );
+});
+
+test('wraps failed Zig cache directory creation in a Marmotta error', async () => {
+  await withToolchainEnvironment(
+    async ({ directory, env }) => {
+      // A regular-file component makes recursive mkdir fail deterministically.
+      const blockedParent = join(directory, 'not-a-directory');
+      await writeFile(blockedParent, 'cache parent is a file');
+
+      const result = runRunZigResult({ env });
+
+      assert.equal(result.status, 1);
+      assert.equal(result.code, 'MARMOTTA_DIRECTORY_FAILED');
+      assert.equal(result.exitCode, 1);
+      assert.match(result.message, /^Unable to create /);
+    },
+    (directory) => join(directory, 'not-a-directory', 'cache-root'),
+  );
 });
 
 test('downloads the exact pinned Zig release rather than the latest indexed version', {
