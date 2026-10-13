@@ -26,7 +26,7 @@ Options:
   -v, --version       show the version
 
 Environment:
-  MARMOTTA_ZIG_DIR    custom directory for managed Zig toolchains and build state`;
+  MARMOTTA_HOME       absolute path that replaces ~/.marmotta as Marmotta's root directory`;
 
 type ParsedArgs = { command: string; positional: string[]; options: BuildOptions; help: boolean };
 

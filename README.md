@@ -4,11 +4,14 @@
   <img src="https://raw.githubusercontent.com/napi-bindings/marmotta/main/marmotta.jpg" alt="Marmotta, the native addon build tool" width="384">
 </p>
 
-<p align="center">
-  <a href="https://github.com/napi-bindings/marmotta/actions/workflows/ci.yml">
-    <img src="https://github.com/napi-bindings/marmotta/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI">
-  </a>
-</p>
+<div align="center">
+
+[![CI](https://github.com/napi-bindings/marmotta/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/napi-bindings/marmotta/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/napi-bindings/marmotta)](https://github.com/napi-bindings/marmotta/releases/latest)
+[![marmotta monthly downloads on npm](https://img.shields.io/npm/dm/marmotta?label=marmotta%20downloads)](https://www.npmjs.com/package/marmotta)
+[![@napi-bindings/marmotta monthly downloads on npm](https://img.shields.io/npm/dm/%40napi-bindings%2Fmarmotta?label=%40napi-bindings%2Fmarmotta%20downloads)](https://www.npmjs.com/package/@napi-bindings/marmotta)
+
+</div>
 
 Marmotta builds Node.js native addons written in C or C++ with [Node-API](https://nodejs.org/api/n-api.html). It uses [Zig](https://ziglang.org/) as the compiler toolchain and can install Zig for you, so projects do not need to configure `node-gyp` or CMake.
 
@@ -183,7 +186,7 @@ Use a target triple supported by Zig for the intended target. Cross-compilation 
 
 ## Zig toolchain
 
-Without a `zigVersion` pin, Marmotta uses `zig` from `PATH` when available, then a locally managed version, and otherwise downloads the latest stable Zig release for the supported host platform. By default, managed toolchains are stored in `.marmotta` in the user's home directory (`~/.marmotta` on Unix-like systems or `%USERPROFILE%\.marmotta`). Set `MARMOTTA_ZIG_DIR` to use a different root instead; for example, `export MARMOTTA_ZIG_DIR=/opt/shared-tools` stores Zig under `/opt/shared-tools/toolchains/zig`. The directory must be writable. When it is set, Marmotta also places Zig's global cache at `<root>/cache`, so builds do not need a writable home directory. If `zigVersion` is set, Marmotta ignores `PATH` and selects that exact managed version, downloading it if necessary. If the pinned version is not available for the host platform, the command fails instead of falling back to another version. If the download index includes a checksum, Marmotta verifies the downloaded archive.
+Without a `zigVersion` pin, Marmotta uses `zig` from `PATH` when available, then a locally managed version, and otherwise downloads the latest stable Zig release for the supported host platform into the Marmotta home directory (see [Marmotta home directory](#marmotta-home-directory)). If `zigVersion` is set, Marmotta ignores `PATH` and selects that exact managed version, downloading it if necessary. If the pinned version is not available for the host platform, the command fails instead of falling back to another version. If the download index includes a checksum, Marmotta verifies the downloaded archive.
 
 Prepare Zig in advance:
 
@@ -199,6 +202,23 @@ npx marmotta remove 0.14.1
 ```
 
 `list` and `remove` operate only on versions managed by Marmotta; they do not list, uninstall, or modify a system Zig executable found on `PATH`.
+
+### Marmotta home directory
+
+Marmotta stores managed Zig toolchains (`toolchains/zig/<version>`) and temporary build files in its home directory. By default this is `.marmotta` in the user's home directory (`~/.marmotta` on Unix-like systems or `%USERPROFILE%\.marmotta` on Windows).
+
+Set `MARMOTTA_HOME` to use another directory, for example when the home directory is read-only or not persistent, as on restricted CI runners or in containers:
+
+```sh
+export MARMOTTA_HOME=/var/cache/marmotta
+npx marmotta build
+```
+
+- The value must be an absolute path. On Windows it must start with a drive letter (`D:\marmotta`) or be a UNC path (`\\server\share\marmotta`); root-relative paths such as `\marmotta` and device paths such as `\\?\` or `\\.\` are not accepted. `~` is not expanded, and values with leading or trailing whitespace are rejected instead of being trimmed. Invalid values are rejected with `MARMOTTA_HOME_INVALID`.
+- An empty value is treated as unset.
+- Marmotta creates the directory, and the subdirectories it needs, when a command first writes to it. If a directory cannot be created or written, for example when building, the command fails with `MARMOTTA_HOME_UNAVAILABLE` and names the directory and the cause. A failed Zig installation keeps its `ZIG_INSTALL_FAILED` code and includes the same details. Commands that write nothing, such as `marmotta list`, or `configure` and `install` when Zig is already available, also work with a read-only directory.
+- When `MARMOTTA_HOME` is set, Zig's global cache is placed in `<MARMOTTA_HOME>/cache`, so builds do not write to the home directory. If `ZIG_GLOBAL_CACHE_DIR` is already set to a non-empty value, Marmotta leaves it unchanged. Without `MARMOTTA_HOME`, Marmotta does not change the cache location and Zig uses its own default.
+- Marmotta only removes files and directories it created, such as a Zig version removed with `marmotta remove` or temporary build directories. It never deletes or cleans the `MARMOTTA_HOME` directory itself, so it can point to a shared location.
 
 ## Contributing
 
