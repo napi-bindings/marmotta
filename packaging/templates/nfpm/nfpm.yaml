@@ -1,0 +1,52 @@
+name: marmotta
+arch: {{NFPM_ARCH}}
+platform: linux
+version: {{VERSION}}
+section: devel
+priority: optional
+maintainer: "{{MAINTAINER}}"
+description: "{{DESCRIPTION}}"
+vendor: napi-bindings
+homepage: {{REPOSITORY}}
+license: Apache-2.0
+overrides:
+  deb:
+    depends:
+      - libc6
+  rpm:
+    depends:
+      - glibc
+  apk:
+    depends:
+      - musl
+      - libstdc++
+      - libgcc
+  archlinux:
+    depends:
+      - glibc
+contents:
+  - src: {{BINARY}}
+    dst: /usr/bin/marmotta
+    file_info:
+      mode: 0755
+  # Every packager expects the license in its own location.
+  - src: {{LICENSE_FILE}}
+    dst: /usr/share/doc/marmotta/copyright
+    packager: deb
+    file_info:
+      mode: 0644
+  - src: {{LICENSE_FILE}}
+    dst: /usr/share/licenses/marmotta/LICENSE
+    packager: rpm
+    file_info:
+      mode: 0644
+  - src: {{LICENSE_FILE}}
+    dst: /usr/share/licenses/marmotta/LICENSE
+    packager: apk
+    file_info:
+      mode: 0644
+  - src: {{LICENSE_FILE}}
+    dst: /usr/share/licenses/marmotta/LICENSE
+    packager: archlinux
+    file_info:
+      mode: 0644

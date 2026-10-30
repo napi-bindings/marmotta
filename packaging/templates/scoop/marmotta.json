@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/scoop-app.json",
+  "version": "{{VERSION}}",
+  "description": "{{DESCRIPTION}}",
+  "homepage": "{{REPOSITORY}}",
+  "license": "Apache-2.0",
+  "architecture": {
+    "64bit": {
+      "url": "{{REPOSITORY}}/releases/download/v{{VERSION}}/{{ASSET_WINDOWS_X64}}#/marmotta.exe",
+      "hash": "{{SHA256_WINDOWS_X64}}",
+      "bin": "marmotta.exe"
+    },
+    "arm64": {
+      "url": "{{REPOSITORY}}/releases/download/v{{VERSION}}/{{ASSET_WINDOWS_ARM64}}#/marmotta.exe",
+      "hash": "{{SHA256_WINDOWS_ARM64}}",
+      "bin": "marmotta.exe"
+    }
+  },
+  "checkver": {
+    "github": "{{REPOSITORY}}"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "{{REPOSITORY}}/releases/download/v$version/marmotta-v$version-windows-x64.exe#/marmotta.exe"
+      },
+      "arm64": {
+        "url": "{{REPOSITORY}}/releases/download/v$version/marmotta-v$version-windows-arm64.exe#/marmotta.exe"
+      }
+    },
+    "hash": {
+      "url": "$baseurl/SHA256SUMS"
+    }
+  }
+}

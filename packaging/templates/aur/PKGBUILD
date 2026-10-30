@@ -1,0 +1,37 @@
+# Maintainer: {{MAINTAINER}}
+pkgname=marmotta-bin
+pkgver={{VERSION}}
+pkgrel=1
+pkgdesc='{{DESCRIPTION}}'
+arch=('x86_64' 'aarch64')
+url='{{REPOSITORY}}'
+license=('Apache-2.0')
+depends=('glibc')
+provides=('marmotta')
+conflicts=('marmotta')
+options=('!strip' '!debug')
+
+# The asset URLs are built from ${pkgver} here instead of rendered asset variables so that a
+# version bump only has to change pkgver and the checksums; keep them in sync with the release
+# asset naming.
+source_x86_64=(
+  "{{REPOSITORY}}/releases/download/v${pkgver}/marmotta-v${pkgver}-linux-x64"
+  "LICENSE::https://raw.githubusercontent.com/{{REPOSITORY_SLUG}}/v${pkgver}/LICENSE"
+)
+sha256sums_x86_64=('{{SHA256_LINUX_X64}}' '{{SHA256_LICENSE}}')
+
+source_aarch64=(
+  "{{REPOSITORY}}/releases/download/v${pkgver}/marmotta-v${pkgver}-linux-arm64"
+  "LICENSE::https://raw.githubusercontent.com/{{REPOSITORY_SLUG}}/v${pkgver}/LICENSE"
+)
+sha256sums_aarch64=('{{SHA256_LINUX_ARM64}}' '{{SHA256_LICENSE}}')
+
+package() {
+  local _asset="marmotta-v${pkgver}-linux-x64"
+  if [[ $CARCH == aarch64 ]]; then
+    _asset="marmotta-v${pkgver}-linux-arm64"
+  fi
+
+  install -Dm755 "$srcdir/$_asset" "$pkgdir/usr/bin/marmotta"
+  install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
