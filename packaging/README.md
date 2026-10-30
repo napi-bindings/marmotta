@@ -27,8 +27,8 @@ packaging/out/
 Download the assets of a release and render everything:
 
 ```sh
-gh release download v0.8.0 --dir dist
-node scripts/packages.mjs --version 0.8.0 --sums dist/SHA256SUMS --artifacts dist --out packaging/out
+gh release download v0.9.0 --dir dist
+node scripts/packages.mjs --version 0.9.0 --sums dist/SHA256SUMS --artifacts dist --out packaging/out
 ```
 
 To compute the checksums from binaries that are already on disk instead of using `SHA256SUMS`:

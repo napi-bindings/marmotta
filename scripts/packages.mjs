@@ -5,7 +5,7 @@
 // Usage:
 //   node scripts/packages.mjs --artifacts dist --out packages
 //   node scripts/packages.mjs --artifacts dist --out packages --build
-//   node scripts/packages.mjs --version 0.8.0 --sums dist/SHA256SUMS --artifacts dist --out packages
+//   node scripts/packages.mjs --version 0.9.0 --sums dist/SHA256SUMS --artifacts dist --out packages
 //
 // The checksums are read from SHA256SUMS when --sums is given; otherwise they are computed from
 // the release assets in --artifacts. Only the Linux assets are packaged as native packages; the
